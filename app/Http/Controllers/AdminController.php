@@ -240,10 +240,13 @@ class AdminController extends Controller
     {
         // Read settings from database
         $settings = Setting::pluck('value', 'key')->toArray();
+        $logoFilename = $settings['restaurant_logo'] ?? null;
+        $logoUrl = $logoFilename ? '/storage/logos/' . $logoFilename : null;
 
         return response()->json([
             'restaurant_name' => $settings['restaurant_name'] ?? 'RestauPro',
-            'restaurant_logo_url' => $settings['restaurant_logo_url'] ?? null,
+            'restaurant_logo_url' => $logoUrl,
+            'logo' => $logoFilename,
             'language' => $settings['language'] ?? 'fr',
         ]);
     }
@@ -267,16 +270,18 @@ class AdminController extends Controller
             'language' => 'string|max:10',
         ]);
 
-        // Handle logo file upload - store as base64
+        // Handle logo file upload
         if ($request->hasFile('restaurant_logo')) {
             $file = $request->file('restaurant_logo');
-            $fileContent = file_get_contents($file->getRealPath());
-            $base64 = 'data:' . $file->getMimeType() . ';base64,' . base64_encode($fileContent);
+            $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
             
-            // Save logo to database
+            // Store file in public storage
+            $path = $file->storeAs('logos', $filename, 'public');
+            
+            // Save just the filename to database
             Setting::updateOrCreate(
-                ['key' => 'restaurant_logo_url'],
-                ['value' => $base64]
+                ['key' => 'restaurant_logo'],
+                ['value' => $filename]
             );
         }
 
