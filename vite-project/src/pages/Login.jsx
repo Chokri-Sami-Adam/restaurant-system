@@ -27,18 +27,12 @@ const Login = () => {
         if (res.data) {
           setAppName(res.data.restaurant_name || 'RestauPro');
           if (res.data.restaurant_logo_url) {
-            console.log('Logo URL found:', res.data.restaurant_logo_url);
+            console.log('Logo URL:', res.data.restaurant_logo_url);
             setLogoUrl(res.data.restaurant_logo_url);
-          } else if (res.data.logo) {
-            const logoPath = `${apiBaseUrl}/storage/logos/${res.data.logo}`;
-            console.log('Logo path constructed:', logoPath);
-            setLogoUrl(logoPath);
-          } else {
-            console.log('No logo in settings');
           }
         }
       } catch (err) {
-        console.log('Failed to fetch settings:', err);
+        console.error('Failed to fetch settings:', err);
       }
     };
 

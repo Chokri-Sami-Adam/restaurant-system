@@ -240,13 +240,13 @@ class AdminController extends Controller
     {
         // Read settings from database
         $settings = Setting::pluck('value', 'key')->toArray();
-        $logoFilename = $settings['restaurant_logo'] ?? null;
-        $logoUrl = $logoFilename ? '/storage/logos/' . $logoFilename : null;
+        
+        // Get logo URL from restaurant_logo_url field (which contains full path or data)
+        $logoUrl = $settings['restaurant_logo_url'] ?? null;
 
         return response()->json([
             'restaurant_name' => $settings['restaurant_name'] ?? 'RestauPro',
             'restaurant_logo_url' => $logoUrl,
-            'logo' => $logoFilename,
             'language' => $settings['language'] ?? 'fr',
         ]);
     }
@@ -266,28 +266,12 @@ class AdminController extends Controller
             'backup_enabled' => 'boolean',
             'debug_mode' => 'boolean',
             'restaurant_name' => 'string|max:255',
-            'restaurant_logo' => 'nullable|image|max:5120',
+            'restaurant_logo_url' => 'nullable|string',
             'language' => 'string|max:10',
         ]);
 
-        // Handle logo file upload
-        if ($request->hasFile('restaurant_logo')) {
-            $file = $request->file('restaurant_logo');
-            $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
-            
-            // Store file in public storage
-            $path = $file->storeAs('logos', $filename, 'public');
-            
-            // Save just the filename to database
-            Setting::updateOrCreate(
-                ['key' => 'restaurant_logo'],
-                ['value' => $filename]
-            );
-        }
-
-        // Save each other setting to database
+        // Save each setting to database
         foreach ($validated as $key => $value) {
-            if ($key === 'restaurant_logo') continue;
             $storeValue = $value;
             if (is_bool($value)) {
                 $storeValue = $value ? '1' : '0';
