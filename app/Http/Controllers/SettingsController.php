@@ -188,7 +188,6 @@ class SettingsController extends Controller
             
             $validated['restaurant_logo_path'] = 'restaurant-logos/logo.png';
         }
-        }
 
         // Keep backward compatibility in sync
         if (array_key_exists('restaurant_name', $validated)) {
