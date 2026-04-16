@@ -277,20 +277,20 @@ class AdminController extends Controller
             try {
                 $file = $request->file('restaurant_logo');
                 
+                // Get the file content as stream
+                $stream = $file->getStream();
+                $contents = $stream->getContents();
+                
                 // Delete old logo if it exists
                 Storage::disk('public')->delete('restaurant-logos/logo.png');
                 
-                // Save the new file with exact name
-                $path = Storage::disk('public')->putFileAs(
-                    'restaurant-logos',
-                    $file,
-                    'logo.png'
-                );
+                // Save with exact filename using put()
+                Storage::disk('public')->put('restaurant-logos/logo.png', $contents);
                 
-                \Log::info('Logo saved to: ' . $path);
+                Log::info('Logo successfully saved as logo.png');
                 
             } catch (\Exception $e) {
-                \Log::error('Logo upload error: ' . $e->getMessage());
+                Log::error('Logo upload error: ' . $e->getMessage());
                 return response()->json([
                     'message' => 'Erreur lors de l\'upload du logo: ' . $e->getMessage(),
                 ], 422);
