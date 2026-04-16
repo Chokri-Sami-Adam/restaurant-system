@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Ingredient;
 use App\Models\User;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -221,12 +222,30 @@ class AdminController extends Controller
             'maintenance_mode' => false,
             'backup_enabled' => true,
             'debug_mode' => false,
+            'restaurant_name' => 'RestauPro',
+            'restaurant_logo_url' => null,
+            'language' => 'fr',
         ];
 
-        // Try to get stored settings from cache
-        $storedSettings = cache()->get('app_settings', []);
+        // Read settings from database
+        $storedSettings = Setting::pluck('value', 'key')->toArray();
 
         return response()->json(array_merge($defaults, $storedSettings));
+    }
+
+    /**
+     * 🌐 Public Settings - Get public settings (no auth required)
+     */
+    public function publicSettings()
+    {
+        // Read settings from database
+        $settings = Setting::pluck('value', 'key')->toArray();
+
+        return response()->json([
+            'restaurant_name' => $settings['restaurant_name'] ?? 'RestauPro',
+            'restaurant_logo_url' => $settings['restaurant_logo_url'] ?? null,
+            'language' => $settings['language'] ?? 'fr',
+        ]);
     }
 
     /**
@@ -243,14 +262,48 @@ class AdminController extends Controller
             'maintenance_mode' => 'boolean',
             'backup_enabled' => 'boolean',
             'debug_mode' => 'boolean',
+            'restaurant_name' => 'string|max:255',
+            'restaurant_logo' => 'nullable|image|max:5120',
+            'language' => 'string|max:10',
         ]);
 
-        // Store settings in cache (persists in this session)
-        cache()->put('app_settings', $validated, now()->addDays(365));
+        // Handle logo file upload - store as base64
+        if ($request->hasFile('restaurant_logo')) {
+            $file = $request->file('restaurant_logo');
+            $fileContent = file_get_contents($file->getRealPath());
+            $base64 = 'data:' . $file->getMimeType() . ';base64,' . base64_encode($fileContent);
+            
+            // Save logo to database
+            Setting::updateOrCreate(
+                ['key' => 'restaurant_logo_url'],
+                ['value' => $base64]
+            );
+        }
+
+        // Save each other setting to database
+        foreach ($validated as $key => $value) {
+            if ($key === 'restaurant_logo') continue;
+            $storeValue = $value;
+            if (is_bool($value)) {
+                $storeValue = $value ? '1' : '0';
+            } else if (!is_string($storeValue) && !is_null($storeValue)) {
+                $storeValue = (string)$storeValue;
+            }
+            Setting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $storeValue]
+            );
+        }
+
+        // Re-fetch all settings from database to return
+        $allSettings = Setting::pluck('value', 'key')->toArray();
+
+        // Also store in cache for faster access
+        cache()->put('app_settings', $allSettings, now()->addDays(365));
 
         return response()->json([
             'message' => 'Paramètres mis à jour avec succès',
-            'data' => $validated,
+            'data' => $allSettings,
         ]);
     }
 

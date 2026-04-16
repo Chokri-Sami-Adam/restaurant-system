@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { ChefHat, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
@@ -13,9 +13,33 @@ const Login = () => {
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const appName = localStorage.getItem('app_name') || 'RestauPro';
+  const [appName, setAppName] = useState('RestauPro');
+  const [logoUrl, setLogoUrl] = useState(null);
   const { t } = useI18n();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch public settings (no auth required)
+    const fetchSettings = async () => {
+      try {
+        const res = await axios.get(`${apiBaseUrl}/api/public/settings`);
+        console.log('Public settings response:', res.data);
+        if (res.data) {
+          setAppName(res.data.restaurant_name || 'RestauPro');
+          if (res.data.restaurant_logo_url) {
+            console.log('Logo URL found:', res.data.restaurant_logo_url);
+            setLogoUrl(res.data.restaurant_logo_url);
+          } else {
+            console.log('No logo URL in settings');
+          }
+        }
+      } catch (err) {
+        console.log('Failed to fetch settings:', err);
+      }
+    };
+
+    fetchSettings();
+  }, [apiBaseUrl]);
 
   if (localStorage.getItem('token')) return <Navigate to="/" replace />;
 
@@ -65,9 +89,13 @@ const Login = () => {
     <div className="min-h-screen bg-[#0f0f12] flex items-center justify-center px-4 font-sans">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/20 mb-4">
-            <ChefHat className="w-7 h-7 text-white" />
-          </div>
+          {logoUrl ? (
+            <img src={logoUrl} alt="Restaurant Logo" className="w-16 h-16 rounded-2xl shadow-xl shadow-amber-500/20 mb-4 object-cover" />
+          ) : (
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/20 mb-4">
+              <ChefHat className="w-7 h-7 text-white" />
+            </div>
+          )}
           <h1 className="text-xl font-bold text-white">{appName}</h1>
           <p className="text-xs text-zinc-500 mt-1">{t('appSubtitle')}</p>
         </div>

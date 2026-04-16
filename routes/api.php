@@ -19,6 +19,7 @@ use App\Http\Controllers\UserController;
 Route::middleware(['runtime.settings'])->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/public/settings', [AdminController::class, 'publicSettings']);
 });
 
 // ──────────────────────────────────────────────
