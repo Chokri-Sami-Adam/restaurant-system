@@ -267,11 +267,31 @@ class AdminController extends Controller
             'debug_mode' => 'boolean',
             'restaurant_name' => 'string|max:255',
             'restaurant_logo_url' => 'nullable|string',
+            'restaurant_logo' => 'nullable|image|max:5120',
             'language' => 'string|max:10',
         ]);
 
-        // Save each setting to database
+        // Handle logo file upload
+        if ($request->hasFile('restaurant_logo')) {
+            $file = $request->file('restaurant_logo');
+            $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
+            
+            // Store file in public storage
+            $path = $file->storeAs('restaurant-logos', $filename, 'public');
+            
+            // Generate the full URL
+            $logoUrl = env('APP_URL', 'http://localhost') . '/storage/' . str_replace('\\', '/', $path);
+            
+            // Save logo URL to database
+            Setting::updateOrCreate(
+                ['key' => 'restaurant_logo_url'],
+                ['value' => $logoUrl]
+            );
+        }
+
+        // Save each other setting to database
         foreach ($validated as $key => $value) {
+            if ($key === 'restaurant_logo' || $key === 'restaurant_logo_url') continue;
             $storeValue = $value;
             if (is_bool($value)) {
                 $storeValue = $value ? '1' : '0';
