@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -275,8 +276,12 @@ class AdminController extends Controller
             try {
                 $file = $request->file('restaurant_logo');
                 
-                // Always save as logo.png in restaurant-logos folder (replaces old logo)
-                $file->storeAs('restaurant-logos', 'logo.png', 'public');
+                // Use Storage facade to ensure file is saved as exactly logo.png
+                Storage::disk('public')->putFileAs(
+                    'restaurant-logos',
+                    $file,
+                    'logo.png'
+                );
                 
             } catch (\Exception $e) {
                 return response()->json([
