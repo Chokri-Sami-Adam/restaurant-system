@@ -223,7 +223,6 @@ class AdminController extends Controller
             'backup_enabled' => true,
             'debug_mode' => false,
             'restaurant_name' => 'RestauPro',
-            'restaurant_logo_url' => null,
             'language' => 'fr',
         ];
 
@@ -241,8 +240,9 @@ class AdminController extends Controller
         // Read settings from database
         $settings = Setting::pluck('value', 'key')->toArray();
 
-        // Get logo URL from restaurant_logo_url field (which contains full path or data)
-        $logoUrl = $settings['restaurant_logo_url'] ?? null;
+        // Logo path is always at /storage/restaurant-logos/logo.png
+        $baseUrl = env('APP_URL', 'http://localhost:8000');
+        $logoUrl = $baseUrl . '/storage/restaurant-logos/logo.png';
 
         return response()->json([
             'restaurant_name' => $settings['restaurant_name'] ?? 'RestauPro',
@@ -266,33 +266,29 @@ class AdminController extends Controller
             'backup_enabled' => 'sometimes|boolean',
             'debug_mode' => 'sometimes|boolean',
             'restaurant_name' => 'sometimes|string|max:255',
-            'restaurant_logo_url' => 'sometimes|string',
             'restaurant_logo' => 'nullable|image|max:5120',
             'language' => 'sometimes|string|max:10',
         ]);
 
-        // Handle logo file upload
+        // Handle logo file upload - always save as logo.png (replaces old logo)
         if ($request->hasFile('restaurant_logo')) {
             try {
                 $file = $request->file('restaurant_logo');
-                $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
                 
-                // Store file in public storage
-                $path = $file->storeAs('restaurant-logos', $filename, 'public');
+                // Always save as logo.png in restaurant-logos folder (replaces old logo)
+                $file->storeAs('restaurant-logos', 'logo.png', 'public');
                 
-                // Generate the full URL
-                $logoUrl = env('APP_URL', 'http://localhost:8000') . '/storage/' . str_replace('\\', '/', $path);
-                
-                // Save logo URL to database
-                Setting::updateOrCreate(
-                    ['key' => 'restaurant_logo_url'],
-                    ['value' => $logoUrl]
-                );
             } catch (\Exception $e) {
                 return response()->json([
                     'message' => 'Erreur lors de l\'upload du logo: ' . $e->getMessage(),
                 ], 422);
             }
+        }
+
+        // Save each other setting to database
+        foreach ($validated as $key => $value) {
+            if ($key === 'restaurant_logo') continue;
+            $storeValue = $value;
             if (is_bool($value)) {
                 $storeValue = $value ? '1' : '0';
             } else if (!is_string($storeValue) && !is_null($storeValue)) {
