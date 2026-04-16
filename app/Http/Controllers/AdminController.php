@@ -12,6 +12,7 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
@@ -276,14 +277,20 @@ class AdminController extends Controller
             try {
                 $file = $request->file('restaurant_logo');
                 
-                // Use Storage facade to ensure file is saved as exactly logo.png
-                Storage::disk('public')->putFileAs(
+                // Delete old logo if it exists
+                Storage::disk('public')->delete('restaurant-logos/logo.png');
+                
+                // Save the new file with exact name
+                $path = Storage::disk('public')->putFileAs(
                     'restaurant-logos',
                     $file,
                     'logo.png'
                 );
                 
+                \Log::info('Logo saved to: ' . $path);
+                
             } catch (\Exception $e) {
+                \Log::error('Logo upload error: ' . $e->getMessage());
                 return response()->json([
                     'message' => 'Erreur lors de l\'upload du logo: ' . $e->getMessage(),
                 ], 422);
