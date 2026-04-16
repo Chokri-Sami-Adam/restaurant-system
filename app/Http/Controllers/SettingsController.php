@@ -185,7 +185,7 @@ class SettingsController extends Controller
             // Save new logo as exactly logo.png
             $file = $request->file('restaurant_logo');
             Storage::disk('public')->put('restaurant-logos/logo.png', file_get_contents($file));
-            
+
             $validated['restaurant_logo_path'] = 'restaurant-logos/logo.png';
         }
 

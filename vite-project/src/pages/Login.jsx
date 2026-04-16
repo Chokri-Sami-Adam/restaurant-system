@@ -88,10 +88,10 @@ const Login = () => {
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
           {logoUrl ? (
-            <img src={logoUrl} alt="Restaurant Logo" className="w-16 h-16 rounded-2xl shadow-xl shadow-amber-500/20 mb-4 object-cover" />
+            <img src={logoUrl} alt="Restaurant Logo" className="w-12 h-12 rounded-2xl shadow-xl shadow-amber-500/20 mb-4 object-cover" />
           ) : (
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/20 mb-4">
-              <ChefHat className="w-7 h-7 text-white" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/20 mb-4">
+              <ChefHat className="w-6 h-6 text-white" />
             </div>
           )}
           <h1 className="text-xl font-bold text-white">{appName}</h1>
