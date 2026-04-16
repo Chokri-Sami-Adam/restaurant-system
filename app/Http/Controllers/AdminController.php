@@ -242,9 +242,11 @@ class AdminController extends Controller
         // Read settings from database
         $settings = Setting::pluck('value', 'key')->toArray();
 
-        // Logo path is always at /storage/restaurant-logos/logo.png
-        $baseUrl = env('APP_URL', 'http://localhost:8000');
-        $logoUrl = $baseUrl . '/storage/restaurant-logos/logo.png';
+        // Build logo URL from path
+        $logoUrl = null;
+        if (!empty($settings['restaurant_logo_path'])) {
+            $logoUrl = asset('storage/' . $settings['restaurant_logo_path']);
+        }
 
         return response()->json([
             'restaurant_name' => $settings['restaurant_name'] ?? 'RestauPro',

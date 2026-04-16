@@ -176,13 +176,18 @@ class SettingsController extends Controller
         ]);
 
         if ($request->hasFile('restaurant_logo')) {
-            $oldPath = Setting::query()->where('key', 'restaurant_logo_path')->value('value');
-            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
+            // Delete all old logos first
+            if (Storage::disk('public')->exists('restaurant-logos')) {
+                Storage::disk('public')->deleteDirectory('restaurant-logos');
+                Storage::disk('public')->makeDirectory('restaurant-logos');
             }
 
-            $path = $request->file('restaurant_logo')->store('restaurant-logos', 'public');
-            $validated['restaurant_logo_path'] = $path;
+            // Save new logo as exactly logo.png
+            $file = $request->file('restaurant_logo');
+            Storage::disk('public')->put('restaurant-logos/logo.png', file_get_contents($file));
+            
+            $validated['restaurant_logo_path'] = 'restaurant-logos/logo.png';
+        }
         }
 
         // Keep backward compatibility in sync
