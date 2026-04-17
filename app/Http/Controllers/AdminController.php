@@ -78,6 +78,8 @@ class AdminController extends Controller
         $products = Product::select('products.id', 'products.name', 'products.price')
             ->selectRaw('COALESCE(SUM(order_items.quantity), 0) as total_sold')
             ->leftJoin('order_items', 'products.id', '=', 'order_items.product_id')
+            ->leftJoin('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', 'paid')
             ->groupBy('products.id', 'products.name', 'products.price')
             ->orderByRaw('total_sold DESC')
             ->limit($limit)
@@ -111,7 +113,7 @@ class AdminController extends Controller
 
         return response()->json([
             'total_orders' => Order::count(),
-            'completed_orders' => Order::where('status', 'served')->count(),
+            'completed_orders' => Order::where('status', 'paid')->count(),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'total_revenue' => $totalRevenue,
             'average_order_value' => $averageOrderValue,
@@ -126,8 +128,8 @@ class AdminController extends Controller
      */
     public function salesReport(Request $request)
     {
-        $from = $request->query('from') ? Carbon::parse($request->query('from')) : Carbon::now()->subMonth();
-        $to = $request->query('to') ? Carbon::parse($request->query('to')) : Carbon::now();
+        $from = $request->query('from') ? Carbon::parse($request->query('from'))->startOfDay() : Carbon::now()->subMonth()->startOfDay();
+        $to = $request->query('to') ? Carbon::parse($request->query('to'))->endOfDay() : Carbon::now()->endOfDay();
 
         // Get orders with their paid payments
         $orders = Order::whereBetween('created_at', [$from, $to])
@@ -137,7 +139,8 @@ class AdminController extends Controller
             ->get()
             ->filter(function ($order) {
                 return $order->payments->count() > 0;
-            });
+            })
+            ->values();
 
         $totalRevenue = $orders->sum(function ($order) {
             return $order->payments->sum('amount');
@@ -145,12 +148,40 @@ class AdminController extends Controller
         $totalOrders = $orders->count();
         $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
 
+        // Map orders to ensure proper JSON serialization
+        $ordersArray = $orders->map(function ($order) {
+            return [
+                'id' => (int) $order->id,
+                'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+                'type' => (string) $order->type,
+                'total_price' => (float) $order->total_price,
+                'payments' => $order->payments->map(function ($payment) {
+                    return [
+                        'id' => (int) $payment->id,
+                        'amount' => (float) $payment->amount,
+                        'status' => (string) $payment->status,
+                    ];
+                })->toArray(),
+                'items' => $order->items->map(function ($item) {
+                    return [
+                        'id' => (int) $item->id,
+                        'quantity' => (int) $item->quantity,
+                        'product' => [
+                            'id' => (int) $item->product->id,
+                            'name' => (string) $item->product->name,
+                        ]
+                    ];
+                })->toArray(),
+            ];
+        })->toArray();
+
         return response()->json([
-            'period' => ['from' => $from, 'to' => $to],
-            'total_revenue' => $totalRevenue,
-            'total_orders' => $totalOrders,
-            'average_order_value' => $averageOrderValue,
-            'orders' => $orders,
+            'success' => true,
+            'period' => ['from' => $from->format('Y-m-d'), 'to' => $to->format('Y-m-d')],
+            'total_revenue' => (float) $totalRevenue,
+            'total_orders' => (int) $totalOrders,
+            'average_order_value' => (float) $averageOrderValue,
+            'orders' => $ordersArray,
         ]);
     }
 
@@ -159,8 +190,8 @@ class AdminController extends Controller
      */
     public function trendAnalysis(Request $request)
     {
-        $from = $request->query('from') ? Carbon::parse($request->query('from')) : Carbon::now()->subDays(29);
-        $to = $request->query('to') ? Carbon::parse($request->query('to')) : Carbon::now();
+        $from = $request->query('from') ? Carbon::parse($request->query('from'))->startOfDay() : Carbon::now()->subDays(29)->startOfDay();
+        $to = $request->query('to') ? Carbon::parse($request->query('to'))->endOfDay() : Carbon::now()->endOfDay();
 
         $last30Days = [];
         $currentDate = clone $from;

@@ -145,7 +145,16 @@ class TestDataSeeder extends Seeder
             'quantity' => 2,
             'price' => $water->price * 2,
         ]);
-        $servedOrder->update(['total_price' => ($margherita->price * 2) + ($water->price * 2)]);
+        $servedTotal = ($margherita->price * 2) + ($water->price * 2);
+        $servedOrder->update(['total_price' => $servedTotal]);
+
+        // Add PAID payment for served order
+        Payment::create([
+            'order_id' => $servedOrder->id,
+            'amount' => $servedTotal,
+            'method' => 'cash',
+            'status' => 'paid',
+        ]);
 
         // ❌ CANCELLED ORDER
         $cancelledOrder = Order::create([
@@ -161,5 +170,38 @@ class TestDataSeeder extends Seeder
             'price' => $pepperoni->price,
         ]);
         $cancelledOrder->update(['total_price' => $pepperoni->price]);
+
+        // ===== 5. CREATE RECENT PAID ORDERS FOR CHARTS =====
+        // Create 5 orders for the past 7 days with paid payments
+        for ($i = 6; $i >= 0; $i--) {
+            if ($i % 2 == 0) { // Create orders on alternating days
+                $orderDate = now()->subDays($i);
+                $amount = 25 + rand(10, 50);
+
+                $order = Order::create([
+                    'user_id' => 1,
+                    'status' => 'served',
+                    'type' => rand(0, 1) ? 'dine-in' : 'takeaway',
+                    'total_price' => $amount,
+                    'created_at' => $orderDate,
+                    'updated_at' => $orderDate,
+                ]);
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => collect([$margherita->id, $pepperoni->id, $classicBurger->id])->random(),
+                    'quantity' => rand(1, 2),
+                    'price' => $amount,
+                ]);
+
+                // Create PAID payment for this order
+                Payment::create([
+                    'order_id' => $order->id,
+                    'amount' => $amount,
+                    'method' => collect(['cash', 'card', 'mobile'])->random(),
+                    'status' => 'paid',
+                ]);
+            }
+        }
     }
 }

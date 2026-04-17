@@ -115,6 +115,32 @@ const AdminOrders = () => {
     });
   };
 
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      await api.put(`/orders/${orderId}/status`, { status: newStatus });
+      setAlert({ show: true, type: 'success', title: t('success'), message: t('orderStatusUpdated'), onConfirm: null });
+      if (selected?.id === orderId) {
+        setSelected({ ...selected, status: newStatus });
+      }
+      fetchData();
+    } catch (e) {
+      const errorMsg = e.response?.data?.message || t('failedToUpdateStatus');
+      setAlert({ show: true, type: 'error', title: t('error'), message: errorMsg, onConfirm: null });
+    }
+  };
+
+  const getValidNextStatuses = (current) => {
+    const flows = {
+      pending: ['preparing', 'cancelled'],
+      preparing: ['ready', 'cancelled'],
+      ready: ['served', 'cancelled'],
+      served: ['paid', 'cancelled'],
+      paid: [],
+      cancelled: []
+    };
+    return flows[current] || [];
+  };
+
   const openEditModal = (order) => {
     setFormItems(order.items.map(item => ({
       product_id: item.product_id,
@@ -126,6 +152,7 @@ const AdminOrders = () => {
 
   const sc = (s) => ({
     served: 'text-emerald-400 bg-emerald-500/10',
+    paid: 'text-green-400 bg-green-500/10',
     preparing: 'text-sky-400 bg-sky-500/10',
     ready: 'text-violet-400 bg-violet-500/10',
     pending: 'text-amber-400 bg-amber-500/10',
@@ -133,7 +160,7 @@ const AdminOrders = () => {
   }[s] || 'text-zinc-400 bg-zinc-500/10');
 
   const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
-  const canEdit = (order) => !['served', 'cancelled'].includes(order.status);
+  const canEdit = (order) => !['paid', 'cancelled'].includes(order.status);
 
   // Calculate total with tax
   const calculateTotalWithTax = (orderTotalPrice) => {
@@ -166,7 +193,7 @@ const AdminOrders = () => {
       </div>
 
       <div className="flex gap-1 bg-[#18181b]/50 backdrop-blur-sm border border-white/5 rounded-xl p-1 w-fit">
-        {['all', 'pending', 'preparing', 'ready', 'served', 'cancelled'].map(status => (
+        {['all', 'pending', 'preparing', 'ready', 'served', 'paid', 'cancelled'].map(status => (
           <button key={status} onClick={() => setFilter(status)} className={`text-[12px] font-semibold px-4 py-2 rounded-lg transition-all ${
             filter === status ? 'bg-amber-500/10 text-amber-400' : 'text-zinc-500 hover:text-zinc-300'
           }`}>
@@ -216,9 +243,21 @@ const AdminOrders = () => {
                     </td>
                     <td className="px-5 py-3.5 font-semibold text-amber-400">{formatMoney(calculateTotalWithTax(order.total_price))}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-lg ${sc(order.status)}`}>
-                        {t(`status.${order.status}`)}
-                      </span>
+                      <select
+                        value={order.status}
+                        onChange={e => handleStatusChange(order.id, e.target.value)}
+                        disabled={!getValidNextStatuses(order.status).length}
+                        className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-lg ${sc(order.status)} disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+                      >
+                        <option value={order.status} style={{ backgroundColor: '#1f2937', color: '#fff', fontWeight: 'bold', padding: '8px' }}>
+                          {t(`status.${order.status}`)}
+                        </option>
+                        {getValidNextStatuses(order.status).map(s => (
+                          <option key={s} value={s} style={{ backgroundColor: '#374151', color: '#fbbf24', fontWeight: '600', padding: '8px' }}>
+                            → {t(`status.${s}`)}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-5 py-3.5 text-zinc-500 text-xs">{new Date(order.created_at).toLocaleString()}</td>
                     <td className="px-5 py-3.5 text-center">
@@ -372,7 +411,21 @@ const AdminOrders = () => {
               </div>
               <div>
                 <p className="text-[10px] text-zinc-600 uppercase font-semibold tracking-wider">{t('statusLabel')}</p>
-                <p className={`text-[11px] font-bold uppercase px-2 py-1 rounded inline-block mt-1 ${sc(selected.status)}`}>{t(`status.${selected.status}`)}</p>
+                <select
+                  value={selected.status}
+                  onChange={e => handleStatusChange(selected.id, e.target.value)}
+                  disabled={!getValidNextStatuses(selected.status).length}
+                  className={`input-dark w-full text-[11px] font-bold uppercase mt-1 ${sc(selected.status)} disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  <option value={selected.status} style={{ backgroundColor: '#1f2937', color: '#fff', fontWeight: 'bold', padding: '8px' }}>
+                    {t(`status.${selected.status}`)}
+                  </option>
+                  {getValidNextStatuses(selected.status).map(s => (
+                    <option key={s} value={s} style={{ backgroundColor: '#374151', color: '#fbbf24', fontWeight: '600', padding: '8px' }}>
+                      → {t(`status.${s}`)}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <p className="text-[10px] text-zinc-600 uppercase font-semibold tracking-wider">{t('date')}</p>

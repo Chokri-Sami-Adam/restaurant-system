@@ -70,7 +70,7 @@ const WaiterOrders = () => {
   };
 
   const translateStatus = (s) => t(`status.${s}`) || s;
-  const sc = (s) => ({ served: 'text-emerald-400 bg-emerald-500/10', preparing: 'text-sky-400 bg-sky-500/10', ready: 'text-violet-400 bg-violet-500/10', pending: 'text-amber-400 bg-amber-500/10', cancelled: 'text-red-400 bg-red-500/10' }[s] || 'text-zinc-400 bg-zinc-500/10');
+  const sc = (s) => ({ served: 'text-emerald-400 bg-emerald-500/10', paid: 'text-green-400 bg-green-500/10', preparing: 'text-sky-400 bg-sky-500/10', ready: 'text-violet-400 bg-violet-500/10', pending: 'text-amber-400 bg-amber-500/10', cancelled: 'text-red-400 bg-red-500/10' }[s] || 'text-zinc-400 bg-zinc-500/10');
 
   return (
     <div className="space-y-5 max-w-[1400px]">

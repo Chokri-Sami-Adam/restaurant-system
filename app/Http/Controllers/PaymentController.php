@@ -76,6 +76,9 @@ class PaymentController extends Controller
             'status' => 'paid'
         ]);
 
+        // Update order status to paid
+        $order->update(['status' => 'paid']);
+
         return $this->successResponse([
             'payment' => $payment,
             'receipt' => [

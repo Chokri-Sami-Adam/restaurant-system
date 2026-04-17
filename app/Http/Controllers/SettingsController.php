@@ -143,7 +143,7 @@ class SettingsController extends Controller
             'order_dine_in' => 'sometimes|boolean',
             'order_takeaway' => 'sometimes|boolean',
             'order_delivery' => 'sometimes|boolean',
-            'default_order_status' => 'sometimes|string|in:pending,preparing,ready,served,cancelled',
+            'default_order_status' => 'sometimes|string|in:pending,preparing,ready,served,paid,cancelled',
             'auto_update_order_status' => 'sometimes|boolean',
 
             // 4) Notifications

@@ -49,7 +49,7 @@ const Orders = () => {
       setAlert({ show: true, type: 'error', title: t('error'), message: errorMsg, onConfirm: null });
     }
   };
-  const sc = (s) => ({ served:'text-emerald-400 bg-emerald-500/10', preparing:'text-sky-400 bg-sky-500/10', ready:'text-violet-400 bg-violet-500/10', pending:'text-amber-400 bg-amber-500/10', cancelled:'text-red-400 bg-red-500/10' }[s] || 'text-zinc-400 bg-zinc-500/10');
+  const sc = (s) => ({ served:'text-emerald-400 bg-emerald-500/10', paid:'text-green-400 bg-green-500/10', preparing:'text-sky-400 bg-sky-500/10', ready:'text-violet-400 bg-violet-500/10', pending:'text-amber-400 bg-amber-500/10', cancelled:'text-red-400 bg-red-500/10' }[s] || 'text-zinc-400 bg-zinc-500/10');
   const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
 
   // Validation: next valid statuses based on current status
@@ -58,7 +58,8 @@ const Orders = () => {
       pending: ['preparing', 'cancelled'],
       preparing: ['ready', 'cancelled'],
       ready: ['served', 'cancelled'],
-      served: [],
+      served: ['paid', 'cancelled'],
+      paid: [],
       cancelled: []
     };
     return flows[current] || [];
@@ -104,7 +105,7 @@ const Orders = () => {
     const tax = calculateTax(subtotal);
     const total = subtotal + tax;
     const logoHtml = appSettings.restaurant_logo_url ? `<div style="text-align:center;margin-bottom:15px;"><img src="${appSettings.restaurant_logo_url}" alt="logo" style="max-width:80px;max-height:80px;object-fit:contain;" /></div>` : '';
-    
+
     // Receipt label translations
     const receiptLabels = {
       orderReceipt: t('orderReceipt'),
@@ -117,7 +118,7 @@ const Orders = () => {
       total: t('total'),
       thankYou: t('thankYou'),
     };
-    
+
     const content = `
       <!DOCTYPE html>
       <html>
@@ -176,7 +177,7 @@ const Orders = () => {
 
       {/* Filters */}
       <div className="flex gap-1.5 bg-[#18181b] border border-[#27272a] rounded-xl p-1 w-fit overflow-x-auto">
-        {['all','pending','preparing','ready','served','cancelled'].map(f => (
+        {['all','pending','preparing','ready','served','paid','cancelled'].map(f => (
           <button key={f} onClick={() => setFilter(f)}
             className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg capitalize transition-all whitespace-nowrap ${
               filter === f ? 'bg-amber-500/10 text-amber-400' : 'text-zinc-500 hover:text-zinc-300'
@@ -214,7 +215,21 @@ const Orders = () => {
                     <td className="px-5 py-3.5 text-zinc-500 capitalize whitespace-nowrap">{translateType(o.type)}</td>
                     <td className="px-5 py-3.5 text-zinc-500 whitespace-nowrap">{o.items?.length || 0}</td>
                     <td className="px-5 py-3.5 whitespace-nowrap">
-                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-lg inline-block ${sc(o.status)}`}>{translateStatus(o.status)}</span>
+                      <select
+                        value={o.status}
+                        onChange={e => handleStatus(o.id, e.target.value)}
+                        disabled={!getValidNextStatuses(o.status).length}
+                        className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-lg ${sc(o.status)} disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+                      >
+                        <option value={o.status} style={{ backgroundColor: '#1f2937', color: '#fff', fontWeight: 'bold', padding: '8px' }}>
+                          {translateStatus(o.status)}
+                        </option>
+                        {getValidNextStatuses(o.status).map(s => (
+                          <option key={s} value={s} style={{ backgroundColor: '#374151', color: '#fbbf24', fontWeight: '600', padding: '8px' }}>
+                            → {translateStatus(s)}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-5 py-3.5 whitespace-nowrap">
                       <button onClick={() => setSelected(o)} className="p-1.5 text-zinc-600 hover:text-amber-400 rounded-lg hover:bg-amber-500/10 transition-all"><Eye className="w-4 h-4" /></button>
@@ -292,25 +307,27 @@ const Orders = () => {
             </div>
 
             {/* Status Control */}
-            {selected.status !== 'served' && selected.status !== 'cancelled' && (
-              <div>
-                <p className="text-[10px] text-zinc-600 uppercase tracking-wider font-bold mb-2">{t('statusLabel')}</p>
-                <select
-                  value={selected.status}
-                  onChange={e => {
-                    const nextStatus = e.target.value;
-                    handleStatus(selected.id, nextStatus);
-                  }}
-                  disabled={!getValidNextStatuses(selected.status).length}
-                  className={`input-dark w-full ${sc(selected.status)} disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  <option value={selected.status}>{translateStatus(selected.status)}</option>
-                  {getValidNextStatuses(selected.status).map(s => (
-                    <option key={s} value={s}>{translateStatus(s)}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div>
+              <p className="text-[10px] text-zinc-600 uppercase tracking-wider font-bold mb-2">{t('statusLabel')}</p>
+              <select
+                value={selected.status}
+                onChange={e => {
+                  const nextStatus = e.target.value;
+                  handleStatus(selected.id, nextStatus);
+                }}
+                disabled={!getValidNextStatuses(selected.status).length}
+                className={`input-dark w-full ${sc(selected.status)} disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                <option value={selected.status} style={{ backgroundColor: '#1f2937', color: '#fff', fontWeight: 'bold', padding: '8px' }}>
+                  {translateStatus(selected.status)}
+                </option>
+                {getValidNextStatuses(selected.status).map(s => (
+                  <option key={s} value={s} style={{ backgroundColor: '#374151', color: '#fbbf24', fontWeight: '600', padding: '8px' }}>
+                    → {translateStatus(s)}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* Action Buttons */}
             <div className="flex gap-2 pt-2">

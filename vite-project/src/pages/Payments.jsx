@@ -24,8 +24,8 @@ const Payments = () => {
       const allOrders = o.data.data || o.data || [];
       const allPayments = p.data.data || [];
       const paidOrderIds = allPayments.map(pay => pay.order_id);
-      // Show only ready/served orders that are NOT paid
-      setOrders(allOrders.filter(order => ['ready', 'served'].includes(order.status) && !paidOrderIds.includes(order.id)));
+      // Show only served orders that are NOT paid
+      setOrders(allOrders.filter(order => order.status === 'served' && !paidOrderIds.includes(order.id)));
       setPayments(allPayments);
       setPaymentSettings({
         payment_cash: getAppSettings().payment_cash !== false,
@@ -121,7 +121,7 @@ const Payments = () => {
 
       const orderRes = await api.get(`/orders/${paymentDetail.order_id}`);
       const order = orderRes.data.data || orderRes.data;
-      
+
       const appSettings = getAppSettings();
       const taxRate = parseFloat(appSettings.tax_rate || 0);
       const subtotal = parseFloat(paymentDetail.amount) / (1 + taxRate / 100);

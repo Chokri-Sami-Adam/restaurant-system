@@ -137,7 +137,7 @@ class OrderController extends Controller
         $autoUpdate = ($settings['auto_update_order_status'] ?? '0') === '1';
 
         $request->validate([
-            'status' => 'nullable|in:pending,preparing,ready,served,cancelled'
+            'status' => 'nullable|in:pending,preparing,ready,served,paid,cancelled'
         ]);
 
         $order = Order::findOrFail($id);

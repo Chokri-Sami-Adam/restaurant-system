@@ -38,6 +38,7 @@ export const translations = {
       preparing: 'en préparation',
       ready: 'prêt',
       served: 'servi',
+      paid: 'payé',
       cancelled: 'annulé',
     },
     type: {
@@ -348,7 +349,7 @@ export const translations = {
     error: 'Error',
     success: 'Success',
     status: {
-      all: 'All', pending: 'Pending', preparing: 'Preparing', ready: 'Ready', served: 'Served', cancelled: 'Cancelled',
+      all: 'All', pending: 'Pending', preparing: 'Preparing', ready: 'Ready', served: 'Served', paid: 'Paid', cancelled: 'Cancelled',
     },
     type: { dineIn: 'Dine in', takeaway: 'Takeaway', delivery: 'Delivery' },
     printReceipt: 'Print Receipt',
@@ -654,7 +655,7 @@ export const translations = {
     maintenanceBanner: 'الصيانة',
     error: 'خطأ',
     success: 'نجاح',
-    status: { all: 'الكل', pending: 'قيد الانتظار', preparing: 'قيد التحضير', ready: 'جاهز', served: 'تم التقديم', cancelled: 'ملغي' },
+    status: { all: 'الكل', pending: 'قيد الانتظار', preparing: 'قيد التحضير', ready: 'جاهز', served: 'تم التقديم', paid: 'مدفوع', cancelled: 'ملغي' },
     type: { dineIn: 'داخل المطعم', takeaway: 'للأخذ', delivery: 'توصيل' },
     dashboardSubtitle: 'نظرة عامة على أداء مطعمك',
     recentOrders: 'الطلبات الأخيرة',
