@@ -1,0 +1,777 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@keyframes gradientBG {
+	0% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+	100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+body {
+  background-color: #09090b;
+  color: #e4e4e7;
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+@keyframes float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(8%, 8%) scale(1.1); }
+}
+@keyframes float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-8%, -8%) scale(1.15); }
+}
+@keyframes float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(10%, -5%) scale(0.9); }
+}
+
+.animate-orb-1 { animation: float-1 18s ease-in-out infinite; }
+.animate-orb-2 { animation: float-2 22s ease-in-out infinite; }
+.animate-orb-3 { animation: float-3 25s ease-in-out infinite; }
+
+h1, h2, h3, h4, h5, h6, .brand-font {
+  font-family: 'Outfit', system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: rgba(234, 179, 8, 0.3);
+  color: white;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+/* Utility Classes */
+.card {
+  background: rgba(24, 24, 27, 0.5);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.card:hover {
+  border-color: rgba(234, 179, 8, 0.15);
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.3), 0 0 40px -10px rgba(234, 179, 8, 0.1);
+  background: rgba(30, 30, 35, 0.6);
+}
+
+.card-flat {
+  background: rgba(24, 24, 27, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+}
+
+.glow-amber {
+  position: relative;
+  overflow: hidden;
+}
+.glow-amber::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 100%;
+  background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(234,179,8,0.06), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+  z-index: 10;
+}
+.glow-amber:hover::before {
+  opacity: 1;
+}
+
+.input-dark {
+  background: rgba(15, 15, 18, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: white;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  width: 100%;
+}
+.input-dark:focus {
+  border-color: #eab308;
+  background: rgba(15, 15, 18, 0.95);
+  box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.15);
+}
+.input-dark::placeholder {
+  color: #52525b;
+}
+
+.input-dark[type="date"] {
+  color-scheme: dark;
+}
+
+.input-dark[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.95;
+  filter: brightness(0) saturate(100%) invert(72%) sepia(84%) saturate(1857%) hue-rotate(357deg) brightness(98%) contrast(90%);
+}
+
+.input-dark[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+  color: #0f0f12;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.3px;
+  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 6px 20px rgba(234, 179, 8, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: 0.6s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(234, 179, 8, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.btn-primary:hover::after {
+  left: 150%;
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  color: #a1a1aa;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+
+/* ========== LIGHT MODE THEME - PREMIUM SAAS DESIGN ========== */
+
+/* Color System CSS Variables */
+:root {
+  --light-bg-primary: #f8fafc;
+  --light-bg-secondary: #f1f5f9;
+  --light-bg-tertiary: #ffffff;
+  --light-text-primary: #111827;
+  --light-text-secondary: #4b5563;
+  --light-text-tertiary: #6b7280;
+  --light-border: #e5e7eb;
+  --light-border-light: #f3f4f6;
+  --light-accent-primary: #ea580c;
+  --light-accent-secondary: #f97316;
+  --light-accent-light: #fed7aa;
+  --light-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --light-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --light-shadow-lg: 0 10px 15px -3px rgba(234, 88, 12, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Light Mode Complete Theme */
+.light-mode {
+  background-color: #f8fafc;
+  color-scheme: light;
+}
+
+/* Remove ALL Black Backgrounds in Light Mode */
+.light-mode body {
+  background: #f8fafc !important;
+  color: #111827 !important;
+}
+
+/* Keep standard Tailwind background colors in light mode */
+
+/* Light Mode Scrollbar */
+.light-mode::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.light-mode::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.light-mode::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+}
+
+.light-mode::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Light Mode Selection */
+.light-mode ::selection {
+  background: rgba(234, 88, 12, 0.15);
+  color: #111827;
+}
+
+/* Remove Dark Orbs & Mesh in Light Mode */
+.light-mode [class*="animate-orb"] {
+  display: none !important;
+}
+
+.light-mode [class*="radial-gradient"] {
+  background: none !important;
+}
+
+/* Light Mode Cards - Clean & Premium */
+.light-mode .card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.light-mode .card:hover {
+  background: #ffffff;
+  border-color: #f0e4d4;
+  box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.light-mode .card-flat {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  box-shadow: none;
+}
+
+/* Light Mode Glow Effect */
+.light-mode .glow-amber::before {
+  background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(234,88,12,0.08), transparent 40%);
+}
+
+/* Light Mode Layout - Ensure Visible Backgrounds */
+.light-mode .flex {
+  background-color: inherit;
+}
+
+.light-mode .overflow-hidden {
+  background-color: inherit;
+}
+
+.light-mode main {
+  background: #f8fafc !important;
+  color: #111827 !important;
+}
+
+/* Light Mode Input Fields - SaaS Style */
+.light-mode .input-dark {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  transition: all 0.2s ease;
+}
+
+.light-mode .input-dark:hover {
+  border-color: #d1d5db;
+}
+
+.light-mode .input-dark:focus {
+  border-color: #ea580c;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+}
+
+.light-mode .input-dark::placeholder {
+  color: #9ca3af;
+}
+
+.light-mode .input-dark[type="date"] {
+  color-scheme: light;
+}
+
+.light-mode .input-dark[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.3);
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.light-mode .input-dark[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Light Mode Primary Button - Warm Orange */
+.light-mode .btn-primary {
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.25);
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.light-mode .btn-primary:hover {
+  box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.3);
+  transform: translateY(-2px);
+}
+
+.light-mode .btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.2);
+}
+
+/* Light Mode Ghost Button - Soft Gray */
+.light-mode .btn-ghost {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+
+.light-mode .btn-ghost:hover {
+  background: #eff2f5;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+/* Light Mode Background Patterns */
+.light-mode [class*="bg-\[#0a0a0c\]"],
+.light-mode [class*="bg-\[#09090b\]"],
+.light-mode [class*="bg-black"] {
+  @apply bg-white;
+}
+
+/* Light Mode Text Colors - Professional Hierarchy */
+.light-mode .text-zinc-100,
+.light-mode .text-white {
+  @apply text-gray-900;
+}
+
+.light-mode .text-zinc-200 {
+  @apply text-gray-800;
+}
+
+.light-mode .text-zinc-300 {
+  @apply text-gray-700;
+}
+
+.light-mode .text-zinc-400 {
+  @apply text-gray-600;
+}
+
+.light-mode .text-zinc-500 {
+  @apply text-gray-500;
+}
+
+.light-mode .text-e4e4e7 {
+  @apply text-gray-900;
+}
+
+/* Light Mode Border Colors - Subtle */
+.light-mode [class*="border-white"],
+.light-mode [class*="border-zinc"] {
+  @apply border-gray-200;
+}
+
+/* Light Mode Hover Effects */
+.light-mode [class*="bg-white/"],
+.light-mode [class*="bg-zinc"] {
+  @apply bg-gray-50;
+}
+
+.light-mode [class*="hover:bg-white/5"] {
+  @apply hover:bg-gray-100 transition-colors;
+}
+
+.light-mode [class*="hover:bg-white/8"] {
+  @apply hover:bg-gray-100 transition-colors;
+}
+
+/* Light Mode Header - Clean & Minimal */
+.light-mode header {
+  background: #ffffff !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Light Mode Sidebar - Professional */
+.light-mode aside {
+  background: #ffffff !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 1px 0 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.light-mode aside nav a {
+  transition: all 0.2s ease;
+}
+
+.light-mode aside nav a:hover {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+/* Light Mode Active Navigation Link */
+.light-mode aside nav a.active {
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.1) 0%, rgba(249, 115, 22, 0.05) 100%);
+  border-color: rgba(234, 88, 12, 0.3) !important;
+  color: #ea580c;
+}
+
+/* CRITICAL: Override ALL Fixed Dark Backgrounds */
+.light-mode,
+.light-mode html {
+  background: #f8fafc !important;
+}
+
+.light-mode body,
+.light-mode main,
+.light-mode > * {
+  background-color: #f8fafc !important;
+}
+
+.light-mode [style*="background: #09090b"],
+.light-mode [style*="background: #0a0a0c"],
+.light-mode [style*="background-color: #09090b"],
+.light-mode [style*="background-color: #0a0a0c"] {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+}
+
+/* Override any opacity-based dark backgrounds */
+.light-mode [style*="rgba(24, 24, 27"],
+.light-mode [style*="rgba(15, 15, 18"],
+.light-mode [style*="rgba(9, 9, 11"],
+.light-mode [style*="rgba(10, 10, 12"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+/* Light Mode Accent Colors */
+.light-mode .text-amber-400 {
+  @apply text-orange-600;
+}
+
+.light-mode .text-amber-300 {
+  @apply text-orange-500;
+}
+
+/* Light Mode Status Badges - Clean & Colorful */
+.light-mode .bg-emerald-500,
+.light-mode [class*="bg-emerald"] {
+  @apply bg-emerald-100 text-emerald-700;
+}
+
+.light-mode .bg-red-500,
+.light-mode [class*="bg-red"] {
+  @apply bg-red-100 text-red-700;
+}
+
+.light-mode .bg-amber-500,
+.light-mode [class*="bg-amber"] {
+  @apply bg-orange-100 text-orange-700;
+}
+
+.light-mode .bg-yellow-500,
+.light-mode [class*="bg-yellow"] {
+  @apply bg-yellow-100 text-yellow-700;
+}
+
+.light-mode .bg-blue-500,
+.light-mode [class*="bg-blue"] {
+  @apply bg-blue-100 text-blue-700;
+}
+
+/* Light Mode Focus Rings - Subtle */
+.light-mode [class*="ring-\[#09090b\]"],
+.light-mode [class*="ring-black"],
+.light-mode focus {
+  @apply ring-orange-200;
+}
+
+/* Light Mode Maintenance/Alert Box */
+.light-mode [class*="border-amber"],
+.light-mode [class*="bg-amber"] {
+  @apply border-orange-200 bg-orange-50 text-orange-800;
+}
+
+/* Light Mode Fixed Background Mesh - No Dark Colors */
+.light-mode .fixed.inset-0 {
+  background: #f8fafc !important;
+  z-index: -1;
+}
+
+/* ========== LIGHT MODE VISIBILITY FIX - ALL ELEMENTS ========== */
+/* Ensure all containers and elements are fully visible in light mode */
+
+.light-mode * {
+  background-color: inherit !important;
+}
+
+.light-mode div,
+.light-mode section,
+.light-mode article,
+.light-mode nav,
+.light-mode aside,
+.light-mode header,
+.light-mode footer,
+.light-mode main,
+.light-mode form,
+.light-mode p,
+.light-mode span,
+.light-mode button,
+.light-mode a,
+.light-mode input,
+.light-mode textarea,
+.light-mode select {
+  color: #111827 !important;
+}
+
+/* Ensure backgrounds are visible - not transparent */
+.light-mode .bg-gray-900,
+.light-mode .bg-gray-950,
+.light-mode .bg-slate-900,
+.light-mode .bg-slate-950,
+.light-mode .bg-zinc-900,
+.light-mode .bg-zinc-950 {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Fix any remaining dark backgrounds */
+.light-mode [class*="dark:bg-"],
+.light-mode [class*="dark:text-"],
+.light-mode .dark\:bg-slate-900 {
+  background-color: inherit !important;
+  color: #111827 !important;
+}
+
+/* Fix modal/dialog backgrounds */
+.light-mode [role="dialog"],
+.light-mode .modal,
+.light-mode .dialog {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Fix dropdown backgrounds */
+.light-mode .dropdown,
+.light-mode [role="menu"],
+.light-mode .menu {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  color: #111827 !important;
+}
+
+/* Ensure form elements are visible */
+.light-mode input,
+.light-mode textarea,
+.light-mode select,
+.light-mode .form-control,
+.light-mode .form-input {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+/* Fix table elements */
+.light-mode table,
+.light-mode thead,
+.light-mode tbody,
+.light-mode tr,
+.light-mode td,
+.light-mode th {
+  background: inherit !important;
+  color: #111827 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Fix list elements */
+.light-mode ul,
+.light-mode ol,
+.light-mode li {
+  color: #111827 !important;
+}
+
+/* Generic catch-all for any element with dark colored backgrounds */
+.light-mode [style*="background: rgb(9, 9, 11)"],
+.light-mode [style*="background: rgb(10, 10, 12)"],
+.light-mode [style*="background: rgb(15, 15, 18)"],
+.light-mode [style*="background: rgb(24, 24, 27)"],
+.light-mode [style*="background-color: rgb(9, 9, 11)"],
+.light-mode [style*="background-color: rgb(10, 10, 12)"],
+.light-mode [style*="background-color: rgb(15, 15, 18)"],
+.light-mode [style*="background-color: rgb(24, 24, 27)"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+.light-mode [class*="z-\[-1\]"] {
+  background: #f8fafc !important;
+  pointer-events: none;
+}
+
+.light-mode .bg-gradient-to-br {
+  background: linear-gradient(to bottom right, #f1f5f9, #f8fafc) !important;
+}
+
+.light-mode [class*="bg-radial-gradient"] {
+  display: none !important;
+}
+
+/* Light Mode Notifications - Modern */
+.light-mode [class*="bg-white/\["] {
+  @apply bg-white;
+}
+
+.light-mode [class*="backdrop-blur"] {
+  backdrop-filter: blur(8px);
+}
+
+/* Light Mode Dividers & Separators */
+.light-mode [class*="border-b"],
+.light-mode [class*="border-t"],
+.light-mode [class*="border-r"],
+.light-mode [class*="border-l"] {
+  border-color: #e5e7eb !important;
+}
+
+/* Light Mode Table Styling */
+.light-mode table {
+  border-collapse: collapse;
+}
+
+.light-mode table th {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+  font-weight: 600;
+}
+
+.light-mode table td {
+  border-bottom: 1px solid #f3f4f6;
+  color: #4b5563;
+}
+
+.light-mode table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* Light Mode Badge/Pill Styling */
+.light-mode .badge,
+.light-mode [class*="px-3 py-1"] {
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* Light Mode Shadow Layers */
+.light-mode .shadow-sm {
+  box-shadow: var(--light-shadow-sm);
+}
+
+.light-mode .shadow-md {
+  box-shadow: var(--light-shadow-md);
+}
+
+.light-mode .shadow-lg {
+  box-shadow: var(--light-shadow-lg);
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  .light-mode body {
+    font-size: 14px;
+  }
+  
+  .light-mode h1 {
+    font-size: 24px;
+  }
+  
+  .light-mode h2 {
+    font-size: 20px;
+  }
+  
+  .light-mode .card {
+    border-radius: 12px;
+  }
+  
+  .light-mode .text-\[18px\] {
+    @apply text-base;
+  }
+  
+  .light-mode .text-\[14px\] {
+    @apply text-sm;
+  }
+}
+
+/* Smooth Transitions */
+.light-mode * {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* ========== FINAL LIGHT MODE CLEANUP - NO DARK BACKGROUNDS ========== */
+
+/* Force Light Background on ALL containers */
+.light-mode {
+  --bg-opacity: 1;
+  background-color: #f8fafc !important;
+}
+
+.light-mode html,
+.light-mode body,
+.light-mode main,
+.light-mode section,
+.light-mode article,
+.light-mode div,
+.light-mode span {
+  --bg-opacity: 1;
+}
+
+/* Remove Any Remaining Dark Backgrounds */
+.light-mode [class*="dark:"],
+.light-mode [class*="0a0a0c"],
+.light-mode [class*="09090b"],
+.light-mode [class*="bg-\[#0"]:not([class*="bg-\[#f"]):not([class*="bg-\[#e"]):not([class*="bg-\[#d"]):not([class*="bg-\[#c"]):not([class*="bg-\[#1"]):not([class*="bg-\[#2"]):not([class*="bg-\[#3"]):not([class*="bg-\[#4"]):not([class*="bg-\[#5"]):not([class*="bg-\[#6"]):not([class*="bg-\[#7"]):not([class*="bg-\[#8"]):not([class*="bg-\[#9"]):not([class*="bg-\[#a"]):not([class*="bg-\[#b"]) {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Override Dark Opacity Patterns */
+.light-mode [style*="rgba(24, 24, 27"],
+.light-mode [style*="rgba(15, 15, 18"],
+.light-mode [style*="rgba(9, 9, 11"],
+.light-mode [style*="rgba(10, 10, 12"],
+.light-mode [style*="background:rgba(24"],
+.light-mode [style*="background:rgba(15"],
+.light-mode [style*="background:rgba(9"],
+.light-mode [style*="background:rgba(10"] {
+  background: transparent !important;
+  background-color: #f8fafc !important;
+}
